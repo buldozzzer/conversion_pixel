@@ -18,7 +18,7 @@ logging.info("Serivce started...")
 
 async def post_impressions(request: web.Request):
     try:
-        data = request.json()
+        data = await request.json()
         print(request.headers.get("User-Agent"))
         client = ClickHouseClient(
             host=config["clickhouse"]["host"], username=config["clickhouse"]["username"]
