@@ -96,9 +96,9 @@ class ClickHouseClient:
             data=rows,
             column_names=[
                 "click_id",
-                "date_time",
                 "revenue",
                 "var",
+                "date_time",
             ],
         ).written_rows
         logging.debug(f"Inserted {len(rows)} row(s)")

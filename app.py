@@ -17,24 +17,27 @@ logging.info("Serivce started...")
 
 
 async def post_impressions(request: web.Request):
+    """ request body example:
+        {
+            "click_id": "e7028256-0c6e-46f4-bc74-6756274f13dc",
+            "os": "Windows",
+            "browser": "Chrome 123",
+            "country": "Russian Federation",
+            "language": "ru",
+            "compaign_id": "compaign_id",
+            "source_id": "source_id",
+            "zone_id": "zone_id"
+        }
+    """
     try:
         data = await request.json()
-        print(request.headers.get("User-Agent"))
         client = ClickHouseClient(
-            host=config["clickhouse"]["host"], username=config["clickhouse"]["username"]
+            host=config["clickhouse"]["host"], username=config["clickhouse"]["username"], port=config["clickhouse"]["port"]
         )
-        # data = [(data["click_id"],
-        #         data["os"],
-        #         data["browser"],
-        #         data["country"],
-        #         data["language"],
-        #         data["compaign_id"],
-        #         data["source_id"],
-        #         data["zone_id"])]
-        data = [data]
-        client.insert_impressions(data)
+        rows = [list(data.values())]
+        client.insert_impressions(rows)
         response_obj = {"status": "success"}
-        return web.Response(text=json.dumps(response_obj), status=200)
+        return web.Response(text=json.dumps(response_obj), status=201)
     except Exception as ex:
         logging.error(ex)
         response_obj = {"status": "failed", "reason": str(ex)}
@@ -42,21 +45,23 @@ async def post_impressions(request: web.Request):
 
 
 async def post_conversions(request: web.Request):
+    """ request body example:
+        {
+            "click_id": "e7028256-0c6e-46f4-bc74-6756274f13dc",
+            "revenue": "revenue",
+            "var": "var"
+        }
+    """
     try:
-        data = request.json()
+        data = await request.json()
         client = ClickHouseClient(
-            host=config["clickhouse"]["host"], username=config["clickhouse"]["username"]
+            host=config["clickhouse"]["host"], username=config["clickhouse"]["username"], port=config["clickhouse"]["port"]
         )
-        # data = [(data["click_id"],
-        #         data["date_time"],
-        #         data["revenue"],
-        #         data["var"])]
-        data = [data]
-        for d in data:
-            d["date_time"] = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
-        client.insert_conversions(data)
+        data["date_time"] = datetime.now(tz=timezone.utc)
+        rows = [list(data.values())]
+        client.insert_conversions(rows)
         response_obj = {"status": "success"}
-        return web.Response(text=json.dumps(response_obj), status=200)
+        return web.Response(text=json.dumps(response_obj), status=201)
     except Exception as ex:
         logging.error(ex)
         response_obj = {"status": "failed", "reason": str(ex)}
@@ -67,6 +72,6 @@ app = web.Application()
 
 app.router.add_post("/impressions", post_impressions)
 
-app.router.add_post("/conversions", post_impressions)
+app.router.add_post("/conversions", post_conversions)
 
 web.run_app(app)
