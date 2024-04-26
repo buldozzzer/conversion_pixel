@@ -6,7 +6,7 @@ import logging
 import json
 import os
 
-config = configparser.ConfigParser
+config = configparser.ConfigParser()
 config.read(os.environ.get("ABUSE_CONFIG_FILE", "config.ini"))
 logging.basicConfig(
     format="%(name)s %(asctime)s %(levelname)s %(message)s",
