@@ -59,7 +59,7 @@ class ClickHouseClient:
                 revenue String,
                 var String
             )
-            ENGINE = MergeTree ORDER BY date_time
+            ENGINE = MergeTree ORDER BY click_id
             """.format(
                 self.__db, self.__table_conversions
             )
