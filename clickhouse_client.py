@@ -75,7 +75,7 @@ class ClickHouseClient:
 
     def insert_impressions(self, rows: list):
         written_rows = self.__client.insert(
-            table=self.__table_conversions,
+            table=self.__table_impressions,
             data=rows,
             column_names=[
                 "click_id",
