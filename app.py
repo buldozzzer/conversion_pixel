@@ -32,6 +32,7 @@ async def post_impressions(request: web.Request):
         #         data["source_id"],
         #         data["zone_id"])]
         data = [data]
+        client.insert_impressions(data)
         response_obj = {"status": "success"}
         return web.Response(text=json.dumps(response_obj), status=200)
     except Exception as ex:
