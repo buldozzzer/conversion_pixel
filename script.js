@@ -49,7 +49,7 @@ async function sendImpressions(){
     redirect: "follow"
     };
 
-    fetch("http://144.126.130.252:8080/impressions", requestOptions)
+    fetch("https://144.126.130.252/impressions", requestOptions)
     .then((response) => response.text())
     .then((result) => console.log(result))
     .catch((error) => console.error(error));
@@ -72,7 +72,7 @@ async function sendConversions(){
         redirect: "follow"
     };
 
-    fetch("http://144.126.130.252:8080/conversions", requestOptions)
+    fetch("https://144.126.130.252/conversions", requestOptions)
     .then((response) => response.text())
     .then((result) => console.log(result))
     .catch((error) => console.error(error));
