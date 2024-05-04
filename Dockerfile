@@ -18,6 +18,8 @@ COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
+RUN apt update && apt install iputils-ping
+
 COPY config.ini .
 
 COPY app.py .
