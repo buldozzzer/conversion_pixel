@@ -1,23 +1,21 @@
 from clickhouse_client import ClickHouseClient
 from datetime import datetime, timezone
-from aiohttp import web
 import configparser
 import logging
-import json
 import os
-import aiohttp_cors
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
 
 config = configparser.ConfigParser()
-config.read(os.environ.get("ABUSE_CONFIG_FILE", "config.ini"))
+config.read(os.environ.get("CONFIG_FILE", "config.ini"))
 logging.basicConfig(
     format="%(name)s %(asctime)s %(levelname)s %(message)s",
     level=logging.getLevelName(config["logging"]["level"]),
 )
 
-logging.info("Serivce started...")
-
-
-async def post_impressions(request: web.Request)-> web.Response:
+@app.route("/impressions", methods=['POST'])
+def post_impressions():
     """ request body example:
         {
             "click_id": "e7028256-0c6e-46f4-bc74-6756274f13dc",
@@ -31,21 +29,20 @@ async def post_impressions(request: web.Request)-> web.Response:
         }
     """
     try:
-        data = await request.json()
+        data = request.data
         client = ClickHouseClient(
             host=config["clickhouse"]["host"], username=config["clickhouse"]["username"], port=config["clickhouse"]["port"]
         )
         rows = [list(data.values())]
         client.insert_impressions(rows)
-        response_obj = {"status": "success"}
-        return web.Response(text=json.dumps(response_obj), status=201)
+        
+        return jsonify({"status": "success"}), 201
     except Exception as ex:
         logging.error(ex)
-        response_obj = {"status": "failed", "reason": str(ex)}
-        return web.Response(text=json.dumps(response_obj), status=500)
+        return jsonify({"status": "failed", "reason": str(ex)}), 500
 
-
-async def post_conversions(request: web.Request) -> web.Response:
+@app.route('/conversions', methods=['POST'])
+def post_conversions():
     """ request body example:
         {
             "click_id": "e7028256-0c6e-46f4-bc74-6756274f13dc",
@@ -54,36 +51,19 @@ async def post_conversions(request: web.Request) -> web.Response:
         }
     """
     try:
-        data = await request.json()
+        data = request.data
         client = ClickHouseClient(
             host=config["clickhouse"]["host"], username=config["clickhouse"]["username"], port=config["clickhouse"]["port"]
         )
         data["date_time"] = datetime.now(tz=timezone.utc)
         rows = [list(data.values())]
         client.insert_conversions(rows)
-        response_obj = {"status": "success"}
-        return web.Response(text=json.dumps(response_obj), status=201)
+        
+        return jsonify({"status": "success"}), 201
     except Exception as ex:
         logging.error(ex)
-        response_obj = {"status": "failed", "reason": str(ex)}
-        return web.Response(text=json.dumps(response_obj), status=500)
+        return jsonify({"status": "failed", "reason": str(ex)}), 500
 
-
-app = web.Application()
-
-app.router.add_post("/impressions", post_impressions)
-
-app.router.add_post("/conversions", post_conversions)
-
-cors = aiohttp_cors.setup(app, defaults={
-   "*": aiohttp_cors.ResourceOptions(
-        allow_credentials=True,
-        expose_headers="*",
-        allow_headers="*"
-    )
-})
-
-for route in list(app.router.routes()):
-    cors.add(route)
-
-web.run_app(app)
+if __name__ == '__main__':
+    logging.info("Serivce started...")
+    app.run(debug = True, port = 8080) 
