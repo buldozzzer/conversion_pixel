@@ -22,14 +22,10 @@ RUN apt update && apt install -y iputils-ping
 
 COPY config.ini .
 
-COPY __init__.py .
-
-COPY gunicorn_config.py .
-
 COPY app.py .
 
 COPY clickhouse_client.py .
 
 EXPOSE 8080
 
-CMD ["gunicorn", "--config", "gunicorn_config.py", "app:app"]
+CMD []
