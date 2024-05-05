@@ -5,6 +5,7 @@ import configparser
 import logging
 import json
 import os
+import aiohttp_cors
 
 config = configparser.ConfigParser()
 config.read(os.environ.get("ABUSE_CONFIG_FILE", "config.ini"))
@@ -16,7 +17,7 @@ logging.basicConfig(
 logging.info("Serivce started...")
 
 
-async def post_impressions(request: web.Request):
+async def post_impressions(request: web.Request)-> web.Response:
     """ request body example:
         {
             "click_id": "e7028256-0c6e-46f4-bc74-6756274f13dc",
@@ -44,7 +45,7 @@ async def post_impressions(request: web.Request):
         return web.Response(text=json.dumps(response_obj), status=500)
 
 
-async def post_conversions(request: web.Request):
+async def post_conversions(request: web.Request) -> web.Response:
     """ request body example:
         {
             "click_id": "e7028256-0c6e-46f4-bc74-6756274f13dc",
@@ -73,5 +74,16 @@ app = web.Application()
 app.router.add_post("/impressions", post_impressions)
 
 app.router.add_post("/conversions", post_conversions)
+
+cors = aiohttp_cors.setup(app, defaults={
+   "*": aiohttp_cors.ResourceOptions(
+        allow_credentials=True,
+        expose_headers="*",
+        allow_headers="*"
+    )
+})
+
+for route in list(app.router.routes()):
+    cors.add(route)
 
 web.run_app(app)
