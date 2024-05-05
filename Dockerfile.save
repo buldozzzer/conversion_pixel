@@ -28,4 +28,4 @@ COPY clickhouse_client.py .
 
 EXPOSE 8080
 
-CMD []
+CMD ["python", "app.py"]
